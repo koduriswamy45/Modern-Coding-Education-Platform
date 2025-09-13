@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Modern Coding Education Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+         :root {
+            --bg: #181A20;
+            --panel-bg: #232632;
+            --accent: #7C4DFF;
+            --accent2: #00BFAE;
+            --text: #ECEFF4;
+            --code-bg: #101217;
+            --border: #252837;
+            --error: #FF5252;
+            --success: #00C853;
+            --font: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--panel-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        header h1 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        
+        main {
+            display: flex;
+            height: calc(100vh - 70px);
+            transition: all 0.2s;
+        }
+        
+        .pane {
+            flex: 1;
+            padding: 2rem;
+            background: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+        
+        .pane:last-child {
+            border-right: none;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #codeEditor {
+            background: var(--code-bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 1.1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            height: 300px;
+            resize: none;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        #codeEditor.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 2px var(--error);
+        }
+        
+        #codeEditor.success {
+            border-color: var(--success);
+            box-shadow: 0 0 0 2px var(--success);
+        }
+        
+        #runCode {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.6rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #7c4dff33;
+            transition: background 0.2s;
+        }
+        
+        #runCode:hover {
+            background: var(--accent2);
+        }
+        
+        #output {
+            background: var(--code-bg);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 60px;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
+        
+        #errorMsg {
+            color: var(--error);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .tutorial-step {
+            background: var(--code-bg);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-left: 4px solid var(--accent2);
+            animation: fadeIn 0.4s;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            width: 100%;
+            background: #22242a;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--accent2);
+            border-radius: 4px;
+            transition: width 0.4s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>DevLearn</h1>
+        <div>
+            <span id="progressText">Progress: 0%</span>
+            <button style="background:var(--accent2);color:white;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;" onclick="resetProgress()">Reset</button>
+        </div>
+    </header>
+    <main>
+        <!-- Left: Editor Pane -->
+        <section class="pane" style="max-width:50vw;">
+            <div class="editor-header">
+                <h2 style="color:var(--accent2);margin:0;">Code Editor</h2>
+                <button id="runCode">Run & Analyze</button>
+            </div>
+            <textarea id="codeEditor" spellcheck="false" autocomplete="off" placeholder="Type your code here..."></textarea>
+            <div id="errorMsg"></div>
+            <div id="output"></div>
+        </section>
+        <!-- Right: Tutorial & Exercise Pane -->
+        <section class="pane" style="background:var(--panel-bg);">
+            <h2 style="color:var(--accent2);">Tutorial</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width:0%"></div>
+            </div>
+            <div id="tutorialContainer"></div>
+            <button id="nextStep" style="margin-top:1rem;background:var(--accent);color:white;padding:0.5rem 1.5rem;border:none;border-radius:6px;cursor:pointer;font-size:1rem;">Next Step</button>
+            <hr style="margin:2rem 0;border-color:#2f3140;">
+            <h2 style="color:var(--accent2);">Practice Exercise</h2>
+            <button id="generateExercise" style="background:var(--accent2);color:white;padding:0.5rem 1.5rem;border:none;border-radius:6px;cursor:pointer;font-size:1rem;">Generate Exercise</button>
+            <div id="exerciseDetails"></div>
+        </section>
+    </main>
+    <script>
+        // Tutorial system
+        const tutorialSteps = [
+            "Welcome! Let's learn JavaScript basics.",
+            "Step 1: Declare a variable using <code>let</code>.<br>Example: <code>let x = 5;</code>",
+            "Step 2: Make a function.<br>Example: <code>function greet(name) { return 'Hello, ' + name; }</code>",
+            "Step 3: Print output.<br>Example: <code>console.log('Welcome!');</code>",
+            "Step 4: Try writing a function that adds two numbers.",
+            "Awesome! You've finished this tutorial."
+        ];
+        let tutorialIndex = 0;
+        const tutorialContainer = document.getElementById('tutorialContainer');
+        const nextStepBtn = document.getElementById('nextStep');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        function showTutorialStep() {
+            tutorialContainer.innerHTML = < div class = "tutorial-step" > $ {
+                tutorialSteps[tutorialIndex]
+            } < /div>;
+            let progress = Math.round((tutorialIndex / (tutorialSteps.length - 1)) * 100);
+            progressBar.style.width = progress + "%";
+            progressText.textContent = Progress: $ {
+                progress
+            } % ;
+            if (tutorialIndex === tutorialSteps.length - 1) {
+                nextStepBtn.style.display = 'none';
+            } else {
+                nextStepBtn.style.display = '';
+            }
+        }
+        nextStepBtn.onclick = () => {
+            if (tutorialIndex < tutorialSteps.length - 1) tutorialIndex++;
+            showTutorialStep();
+        };
+
+        function resetProgress() {
+            tutorialIndex = 0;
+            showTutorialStep();
+        }
+        showTutorialStep();
+
+        // Practice Exercise generator
+        const exerciseBank = [{
+            title: "Sum Array",
+            desc: "Write a function <code>sumArray(arr)</code> that returns the sum of all numbers in the array.",
+            starter: "function sumArray(arr) {\n  // your code here\n}",
+            expected: "sumArray([1,2,3]) // 6"
+        }, {
+            title: "Reverse String",
+            desc: "Write a function <code>reverseString(str)</code> that returns the reversed string.",
+            starter: "function reverseString(str) {\n  // your code here\n}",
+            expected: "reverseString('cat') // 'tac'"
+        }, {
+            title: "Find Prime Numbers",
+            desc: "Write a function <code>findPrimes(n)</code> that returns all prime numbers up to <code>n</code>.",
+            starter: "function findPrimes(n) {\n  // your code here\n}",
+            expected: "findPrimes(10) // [2,3,5,7]"
+        }];
+        document.getElementById('generateExercise').onclick = () => {
+            const ex = exerciseBank[Math.floor(Math.random() * exerciseBank.length)];
+            document.getElementById('exerciseDetails').innerHTML = < strong > $ {
+                ex.title
+            } < /strong><p>${ex.desc}</p > < pre style = "background:var(--code-bg);padding:1rem;border-radius:8px;" > $ {
+                ex.starter
+            } < /pre><p><strong>Expected Output:</strong > $ {
+                ex.expected
+            } < /p>;
+        };
+
+        // Editor, Error detection, Code analysis
+        const editor = document.getElementById('codeEditor');
+        const runBtn = document.getElementById('runCode');
+        const output = document.getElementById('output');
+        const errorMsg = document.getElementById('errorMsg');
+
+        runBtn.onclick = () => {
+            let code = editor.value;
+            output.textContent = '';
+            errorMsg.textContent = '';
+            editor.classList.remove('error', 'success');
+            // Basic syntax error detection
+            try {
+                new Function(code);
+                editor.classList.add('success');
+                errorMsg.textContent = '';
+            } catch (e) {
+                editor.classList.add('error');
+                errorMsg.textContent = "Syntax Error: " + e.message;
+                return;
+            }
+            // Basic code analysis (demo)
+            let feedback = "";
+            if (code.includes('var ')) feedback += "Consider using <code>let</code> or <code>const</code> instead of <code>var</code>.<br>";
+            if (code.match(/for\s*\(.+\)\s*\{[^}]for\s\(.+\)\s*\{/)) feedback += "Nested loops detected. Check efficiency for large data sets.<br>";
+            if (code.includes('function ')) feedback += "Functions detected. Good modular structure.<br>";
+            if (code.includes('console.log')) feedback += "Logging detected. Useful for debugging.<br>";
+            if (feedback) output.innerHTML = feedback;
+
+            // Run code and show output
+            try {
+                let oldLog = console.log;
+                let logs = [];
+                console.log = (msg) => logs.push(msg);
+                let result = eval(code);
+                if (logs.length) output.innerHTML += "<br><strong>Console Output:</strong><br>" + logs.join("<br>");
+                else if (result !== undefined) output.innerHTML += "<br><strong>Result:</strong> " + result;
+                console.log = oldLog;
+            } catch (e) {
+                errorMsg.textContent = "Runtime Error: " + e.message;
+                editor.classList.add('error');
+            }
+        };
+
+        // Optional: Syntax highlighting can be integrated with libraries like Prism.js or CodeMirror in the future.
+    </script>
+</body>
+
+</html>
